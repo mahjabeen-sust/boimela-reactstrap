@@ -1,0 +1,17 @@
+.boimela-logo {
+    color: white;
+    min-width: 180px;
+    font-size: x-large;
+  }
+
+  .book-card {
+    height: 550px; /* Set a fixed height */
+    overflow: hidden; /* Prevent overflowing content */
+  }
+
+  .book-description {
+    min-height: 70px;
+    max-height: 70px; /* Limit the height of the description */
+    overflow: hidden;
+    
+  }
