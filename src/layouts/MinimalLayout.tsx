@@ -1,12 +1,10 @@
 import { Outlet } from "react-router-dom";
 import { Container } from "reactstrap";
 
-
 import Header from "./Header";
 
-
 const MinimalLayout = () => {
-  
+  console.log("inside minimal layout");
   return (
     <main>
       {/********header**********/}

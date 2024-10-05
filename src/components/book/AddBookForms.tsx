@@ -30,6 +30,7 @@ const Forms = () => {
   const categories = useSelector((state: RootState) => state.categories);
 
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
+  // console.log("category id > ", categories.items[0]?.id);
 
   const [newBook, setNewBook] = useState({
     isbn: "",
@@ -41,6 +42,7 @@ const Forms = () => {
     status: "AVAILABLE",
     publishedDate: new Date().toISOString().slice(0, 7).replace("/-/gi", "/"),
   });
+  // console.log("1st newBook", newBook);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -48,6 +50,7 @@ const Forms = () => {
       ...prev,
       [name]: value,
     }));
+    // console.log("inside handle change newBook", newBook);
   };
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -65,7 +68,7 @@ const Forms = () => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    //console.log('newBook', newBook)
+    console.log("newBook inside handle submit", newBook);
     // return 1
     //from mui example
 

@@ -1,8 +1,8 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 
-import ProtectedRoute from './ProtectedRoute';
-import AdminRoute from './AdminRoute'
+import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRoute";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.tsx"));
@@ -10,44 +10,38 @@ const MinimalLayout = lazy(() => import("../layouts/MinimalLayout.tsx"));
 
 /***** Pages ****/
 
-
 const Books = lazy(() => import("../components/book/Books.tsx"));
 const Borrowed = lazy(() => import("..//components/user/Borrowed.tsx"));
 const Dashboard = lazy(() => import("../components/user/Dashboard.tsx"));
 // const LoginControl = lazy(() => import("../components/shared/LoginControl.tsx"));
-const AdminDashboard = lazy(() => import("../components/admin/AdminDashboard.tsx"));
+const AdminDashboard = lazy(
+  () => import("../components/admin/AdminDashboard.tsx")
+);
 const BookForm = lazy(() => import("../components/book/AddBookForms.tsx"));
 const AuthorForm = lazy(() => import("../components/author/AuthorForm.tsx"));
 const EditAuthor = lazy(() => import("../components/author/EditAuthor.tsx"));
-const CategoryForm = lazy(() => import("../components/category/CategoryForm.tsx"));
-const EditCategory = lazy(() => import("../components/category/EditCategory.tsx"));
-const BooksTable = lazy(() => import("../components/book/BooksTable.tsx")); 
+const CategoryForm = lazy(
+  () => import("../components/category/CategoryForm.tsx")
+);
+const EditCategory = lazy(
+  () => import("../components/category/EditCategory.tsx")
+);
+const BooksTable = lazy(() => import("../components/book/BooksTable.tsx"));
 const SignIn = lazy(() => import("../components/shared/SignIn.tsx"));
 const SignUp = lazy(() => import("../components/shared/SignUp.tsx"));
 
 /*****Routes******/
 export const ThemeRoutes = [
+  // MinimalLayout for public routes
   {
-    // Routes for non-logged-in users
-    path: "/login",
-    element: <MinimalLayout />, // MinimalLayout for non-authenticated users
-    children: [
-      { path: "", element: <SignIn /> },
-    ],
-  },
-  {
-    path: "/signup",
-    element: <MinimalLayout />, // MinimalLayout for non-authenticated users
-    children: [
-      { path: "", element: <SignUp /> },
-    ],
-  },
-  {
-    // Public route (home redirects to /books)
     path: "/",
-    element: <MinimalLayout />,
+    element: <MinimalLayout />, // MinimalLayout as parent for public routes
     children: [
-      { path: "/", element: <Navigate to="/books" /> },
+      { path: "/", element: <Books /> }, // Public route redirects to books
+      { path: "login", element: <SignIn /> },
+      { path: "logout", element: <SignIn /> },
+      { path: "signup", element: <SignUp /> },
+      { path: "*", element: <Books /> }, // Fallback for non-matching routes
     ],
   },
   {
@@ -84,12 +78,6 @@ export const ThemeRoutes = [
       },
     ],
   },
-  // Fallback route for non-matching routes
-  {
-    path: "*",
-    element: <Navigate to="/books" />,
-  },
 ];
 
 export default ThemeRoutes;
-

@@ -1,22 +1,24 @@
 import { Button, Nav, NavItem } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
-import { useSelector } from 'react-redux'
+import { useSelector } from "react-redux";
+
+import type { RootState } from "../store";
 import user1 from "../assets/images/users/user4.jpg";
 import probg from "../assets/images/bg/download.jpg";
 import { USER_NAV, ADMIN_NAV } from "../utils/navigation";
-import { RootState } from "../store";
-
-
 
 const Sidebar = () => {
+  console.log("inside sidebar");
   const showMobilemenu = () => {
     document.getElementById("sidebarArea")!.classList.toggle("showSidebar");
   };
   let location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
-  // console.log("user role : ", user?.role);
-  const navigationLinks = user?.role === 'USER' ? USER_NAV : ADMIN_NAV;
 
+  let navigationLinks = undefined;
+  if (user.role !== null) {
+    navigationLinks = user.role === "USER" ? USER_NAV : ADMIN_NAV;
+  }
 
   return (
     <div>
@@ -35,11 +37,13 @@ const Sidebar = () => {
             <i className="bi bi-x"></i>
           </Button>
         </div>
-        <div className="bg-dark text-white p-2 opacity-75">{user?.username}</div>
+        <div className="bg-dark text-white p-2 opacity-75">
+          {user?.username}
+        </div>
       </div>
       <div className="p-3 mt-2">
         <Nav vertical className="sidebarNav">
-          {navigationLinks.map((navi, index) => (
+          {navigationLinks?.map((navi, index) => (
             <NavItem key={index} className="sidenav-bg">
               <Link
                 to={navi.href}
@@ -54,10 +58,8 @@ const Sidebar = () => {
               </Link>
             </NavItem>
           ))}
-         
         </Nav>
       </div>
-      
     </div>
   );
 };
