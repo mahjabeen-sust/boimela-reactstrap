@@ -14,19 +14,16 @@ function LoginControl() {
   return (
     <div>
       {user.username !== null ? (
-        <>
-          {/* <span className="pr-24">{loggedInUser?.firstName}</span> */}
-          <Link to="/logout">
-            <Button
-              color="primary"
-              onClick={() => {
-                dispatch(logout());
-              }}
-            >
-              Logout
-            </Button>
-          </Link>
-        </>
+        <Link to="/logout">
+          <Button
+            color="primary"
+            onClick={() => {
+              dispatch(logout());
+            }}
+          >
+            Logout
+          </Button>
+        </Link>
       ) : (
         <Link to="/login">
           <Button color="primary">Login</Button>
