@@ -2,10 +2,7 @@ import { useState, useEffect, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import type { AppDispatch, RootState } from "../../store";
-import {
-  fetchBooksThunk,
-  addNewBookThunk,
-} from "../../features/books/booksSlice";
+import { addNewBookThunk } from "../../features/books/booksSlice";
 import { fetchAuthorsThunk } from "../../features/authors/authorsSlice";
 import { fetchCategoryThunk } from "../../features/category/categorySlice";
 
@@ -80,7 +77,6 @@ const Forms = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchBooksThunk());
     dispatch(fetchAuthorsThunk());
     dispatch(fetchCategoryThunk());
   }, []);
@@ -200,7 +196,9 @@ const Forms = () => {
                   onChange={(event) => handleChange(event as any)}
                 >
                   {categories.items.map((category) => (
-                    <option value={category.id}>{category.name}</option>
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
                   ))}
                 </Input>
               </FormGroup>
