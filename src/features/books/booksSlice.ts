@@ -3,12 +3,16 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
 import { Book, BookDTO } from "../../type";
+interface ErrorType {
+  message: string;
+  status: number;
+}
 
 export interface BookState {
   items: Book[];
   isLoading: boolean;
-  error: string | null;
-  status: string | null;
+  error: ErrorType | null;
+  status: number | null;
   searchQuery: string;
   filterCriteria: string;
 }
@@ -179,8 +183,7 @@ export const booksSlice = createSlice({
       fetchBooksThunk.rejected,
       (state, action: PayloadAction<any>) => {
         state.isLoading = false;
-        //state.error = action.payload
-        state.error = "Something went wrong ...";
+        state.error = action.payload;
       }
     );
     builder.addCase(
@@ -216,7 +219,10 @@ export const booksSlice = createSlice({
         state.items = [action.payload.data, ...state.items];
         state.status = action.payload.status;
 
-        //console.log('inside addnewauthorThunk reducer>payload: ', action.payload)
+        console.log(
+          "inside addnewauthorThunk fulfilled>payload: ",
+          action.payload
+        );
       }
     );
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 import type { AppDispatch, RootState } from "../../store";
 import {
@@ -26,8 +25,7 @@ import {
 
 const Forms = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate(); // To navigate after success
-
+  const { error, status } = useSelector((state: RootState) => state.books);
   const authors = useSelector((state: RootState) => state.authors);
   const categories = useSelector((state: RootState) => state.categories);
 
@@ -72,52 +70,12 @@ const Forms = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("newBook inside handle submit", newBook);
-    // return 1
-    //from mui example
 
     if (newBook.title && newBook.description) {
       //adding the multiple select to authorIdList
       newBook.authorIdList = selectedAuthors;
       // console.log("newbook: ", newBook);
-      try {
-        const resultAction = await dispatch(addNewBookThunk(newBook)).unwrap(); // Unwrap the action result
-        console.log("resultAction data > ", resultAction);
-
-        if (resultAction.status === 200) {
-          setShowSuccess(true); // Show the success alert
-          setErrorMessage(""); // Clear any previous error messages
-        } else {
-          setErrorMessage("Failed to add the book"); // Set the error message
-          setShowSuccess(false); // Hide the success alert if there was an error
-        }
-
-        // After a short delay, navigate to the /books page
-        if (showSuccess) {
-          // Reset form values
-          setNewBook({
-            title: "",
-            description: "",
-            categoryId: categories?.items[0]?.id ?? "",
-            authorIdList: [],
-            isbn: "",
-            publishers: "",
-            publishedDate: "",
-            status: "AVAILABLE",
-          });
-
-          // Optional delay before navigation
-          setTimeout(() => {
-            setShowSuccess(false); // Hide the success alert
-            navigate("/books"); // Navigate to /books
-          }, 1000);
-        }
-      } catch (error: any) {
-        // Handle any rejected errors from the thunk
-        console.error("Failed to add the book:", error.message);
-        setErrorMessage(
-          error.message || "An error occurred while adding the book"
-        );
-      }
+      dispatch(addNewBookThunk(newBook));
     }
   };
 
@@ -136,6 +94,36 @@ const Forms = () => {
       }));
     }
   }, [categories]);
+
+  useEffect(() => {
+    if (status === 200) {
+      console.error("success adding book:");
+      setShowSuccess(true); // Show the success alert
+      setErrorMessage(""); // Clear any previous error messages
+      // Reset form values
+      setNewBook({
+        title: "",
+        description: "",
+        categoryId: categories?.items[0]?.id ?? "",
+        authorIdList: [],
+        isbn: "",
+        publishers: "",
+        publishedDate: "",
+        status: "AVAILABLE",
+      });
+      // delay to fade the suucess alert
+      setTimeout(() => {
+        setShowSuccess(false); // Hide the success alert
+      }, 2000);
+    }
+    if (error) {
+      console.error("Failed to add the book:", error);
+      setShowSuccess(false);
+      setErrorMessage(
+        error.message || "An error occurred while adding the book"
+      );
+    }
+  }, [status, error]);
 
   return (
     <Row>
