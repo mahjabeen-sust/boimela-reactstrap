@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import type { AppDispatch, RootState } from "../../store";
 import {
@@ -25,19 +26,21 @@ import {
 
 const Forms = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const books = useSelector((state: RootState) => state.books);
+  const navigate = useNavigate(); // To navigate after success
+
   const authors = useSelector((state: RootState) => state.authors);
   const categories = useSelector((state: RootState) => state.categories);
 
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-  // console.log("category id > ", categories.items[0]?.id);
+  const [showSuccess, setShowSuccess] = useState(false); // For success alert
+  const [errorMessage, setErrorMessage] = useState(""); // For error messages
 
   const [newBook, setNewBook] = useState({
     isbn: "",
     title: "",
     description: "",
     publishers: "",
-    categoryId: categories.items[0]?.id || "",
+    categoryId: categories?.items[0]?.id,
     authorIdList: [""],
     status: "AVAILABLE",
     publishedDate: new Date().toISOString().slice(0, 7).replace("/-/gi", "/"),
@@ -66,7 +69,7 @@ const Forms = () => {
     setSelectedAuthors(values);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("newBook inside handle submit", newBook);
     // return 1
@@ -76,7 +79,45 @@ const Forms = () => {
       //adding the multiple select to authorIdList
       newBook.authorIdList = selectedAuthors;
       // console.log("newbook: ", newBook);
-      dispatch(addNewBookThunk(newBook));
+      try {
+        const resultAction = await dispatch(addNewBookThunk(newBook)).unwrap(); // Unwrap the action result
+        console.log("resultAction data > ", resultAction);
+
+        if (resultAction.status === 200) {
+          setShowSuccess(true); // Show the success alert
+          setErrorMessage(""); // Clear any previous error messages
+        } else {
+          setErrorMessage("Failed to add the book"); // Set the error message
+          setShowSuccess(false); // Hide the success alert if there was an error
+        }
+
+        // After a short delay, navigate to the /books page
+        if (showSuccess) {
+          // Reset form values
+          setNewBook({
+            title: "",
+            description: "",
+            categoryId: categories?.items[0]?.id ?? "",
+            authorIdList: [],
+            isbn: "",
+            publishers: "",
+            publishedDate: "",
+            status: "AVAILABLE",
+          });
+
+          // Optional delay before navigation
+          setTimeout(() => {
+            setShowSuccess(false); // Hide the success alert
+            navigate("/books"); // Navigate to /books
+          }, 1000);
+        }
+      } catch (error: any) {
+        // Handle any rejected errors from the thunk
+        console.error("Failed to add the book:", error.message);
+        setErrorMessage(
+          error.message || "An error occurred while adding the book"
+        );
+      }
     }
   };
 
@@ -86,6 +127,16 @@ const Forms = () => {
     dispatch(fetchCategoryThunk());
   }, []);
 
+  // Update categoryId after categories are fetched
+  useEffect(() => {
+    if (categories?.items.length > 0) {
+      setNewBook((prevBook) => ({
+        ...prevBook,
+        categoryId: categories.items[0].id, // Update categoryId once categories are loaded
+      }));
+    }
+  }, [categories]);
+
   return (
     <Row>
       <Col>
@@ -93,6 +144,8 @@ const Forms = () => {
         {/* Card-1*/}
         {/* --------------------------------------------------------------------------------*/}
         <Card>
+          {errorMessage && <Alert color="danger">{errorMessage}</Alert>}
+
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-bell me-2"> </i>
             Add a Book
@@ -191,7 +244,7 @@ const Forms = () => {
                   onChange={(event) => handleChange(event as any)}
                   required
                 >
-                  <option selected>AVAILABLE</option>
+                  <option>AVAILABLE</option>
                   <option>BORROWED</option>
                 </Input>
               </FormGroup>
@@ -210,13 +263,10 @@ const Forms = () => {
               <Button className="btn" outline color="primary" type="submit">
                 Add New Book
               </Button>
-              {books.error ? <span className="error">{books.error}</span> : ""}
-              {books.status == "200" ? (
-                <Alert color="success">Book added successfully!</Alert>
-              ) : (
-                ""
-              )}
             </Form>
+            {showSuccess && (
+              <Alert color="success">Book added successfully!</Alert>
+            )}
           </CardBody>
         </Card>
       </Col>

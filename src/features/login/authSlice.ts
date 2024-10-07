@@ -51,7 +51,7 @@ export const signInThunk = createAsyncThunk(
   "auth/signin",
   async (user: { username: string; password: string }) => {
     const res = await axios.post(`${API_PLACEHOLDER}/signin`, user);
-    console.log("token", res.data);
+    // console.log("token", res.data);
     return {
       token: res.data,
     };
@@ -122,8 +122,6 @@ export const authSlice = createSlice({
           role: decodedUser.role,
         };
         state.user = user;
-        localStorage.setItem("loggedInUserRole", user.role ?? "");
-        localStorage.setItem("loggedInUserName", user.username ?? "");
       }
     });
     builder.addCase(

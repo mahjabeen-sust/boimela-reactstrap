@@ -42,52 +42,46 @@ export const fetchBooksThunk = createAsyncThunk(
   }
 );
 
-//add new book thunk
 export const addNewBookThunk = createAsyncThunk(
   "books/add",
-  async (book: BookDTO) => {
-    //console.log(author)
+  async (book: BookDTO, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
-    console.log("token inside addBook thunk > ", token);
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
     };
 
-    // Make the Axios request
-    const response = await axios
-      .post(`${API_PLACEHOLDER}/api/v1/books/`, book, {
-        headers,
-      })
-      .catch(function (error) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log("error.response > ", error.response);
-          console.log("error.response.data > ", error.response.data);
-          console.log("error.response.status > ", error.response.status);
-          console.log("error.response.headers > ", error.response.headers);
-
-          return {
-            status: error.response.status,
-            data: error.response.data,
-          };
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log("error.request > ", error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log("Error", error.message);
+    try {
+      const response = await axios.post(
+        `${API_PLACEHOLDER}/api/v1/books/`,
+        book,
+        {
+          headers,
         }
-        console.log("error.config", error.config);
-      });
-    //console.log('response', response)
-    return {
-      status: response?.status,
-      data: response?.data,
-    };
+      );
+      return {
+        status: response.status,
+        data: response.data,
+      };
+    } catch (error: any) {
+      if (error.response) {
+        // Handle 409 Conflict or other errors here
+        return rejectWithValue({
+          status: error.response.status,
+          message: error.response.data || "Conflict occurred",
+        });
+      } else if (error.request) {
+        return rejectWithValue({
+          status: "No response",
+          message: "No response from the server",
+        });
+      } else {
+        return rejectWithValue({
+          status: "Request error",
+          message: error.message,
+        });
+      }
+    }
   }
 );
 
@@ -205,6 +199,10 @@ export const booksSlice = createSlice({
     builder.addCase(
       addNewBookThunk.rejected,
       (state, action: PayloadAction<any>) => {
+        console.log(
+          "inside addNewBookThunk.rejected > action paylod: ",
+          action.payload
+        );
         state.isLoading = false;
         state.error = action.payload;
         //state.error = 'Something went wrong ...'
@@ -214,13 +212,9 @@ export const booksSlice = createSlice({
       addNewBookThunk.fulfilled,
       (state, action: PayloadAction<any>) => {
         state.isLoading = false;
-        if (action.payload?.status == 200) {
-          state.items = [action.payload.data, ...state.items];
-          state.error = null;
-        } else {
-          state.error = action.payload?.data;
-        }
-        state.status = action.payload?.status;
+        state.error = null;
+        state.items = [action.payload.data, ...state.items];
+        state.status = action.payload.status;
 
         //console.log('inside addnewauthorThunk reducer>payload: ', action.payload)
       }

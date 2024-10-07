@@ -8,7 +8,6 @@ import probg from "../assets/images/bg/download.jpg";
 import { USER_NAV, ADMIN_NAV } from "../utils/navigation";
 
 const Sidebar = () => {
-  console.log("inside sidebar");
   const showMobilemenu = () => {
     document.getElementById("sidebarArea")!.classList.toggle("showSidebar");
   };

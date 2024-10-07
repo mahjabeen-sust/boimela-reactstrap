@@ -34,7 +34,7 @@ const SignIn = () => {
   useEffect(() => {
     // Navigate after successful login, only when user is set and not null
     if (user.username !== null) {
-      navigate('/books');
+      navigate("/books");
     }
   }, [user, navigate]);
   /* if (user?.role == "ADMIN") {
@@ -45,7 +45,7 @@ const SignIn = () => {
   } */
 
   const handleSignIn = async () => {
-    console.log("Entered hamdle sign in");
+    // console.log("Entered handle sign in");
     dispatch(
       signInThunk({
         username: email,
