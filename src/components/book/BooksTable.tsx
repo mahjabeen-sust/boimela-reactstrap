@@ -1,114 +1,113 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import Table from '@mui/material/Table'
-import { Button } from '@mui/material'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Grid from '@mui/material/Grid'
-
-import AdminNav from '../admin/AdminNav'
-import type { RootState, AppDispatch } from '../../store'
-import { fetchBooksThunk, deleteBookThunk } from '../../features/books/booksSlice'
-import EditBookForm from './EditBookForm'
+import { Row, Col, Table, Card, CardTitle, CardBody, Button } from "reactstrap";
+import type { RootState, AppDispatch } from "../../store";
+import {
+  fetchBooksThunk,
+  deleteBookThunk,
+} from "../../features/books/booksSlice";
+import EditBookForm from "./EditBookForm";
 
 const BooksTable = () => {
-  const { books } = useSelector((state: RootState) => state)
-  const [updateBookIsbn, setUpdateBookIsbn] = useState<null | string>()
-  const [deleteBookIsbn, setDeleteBookIsbn] = useState<null | string>()
+  const books = useSelector((state: RootState) => state.books);
+  const [updateBookIsbn, setUpdateBookIsbn] = useState<null | string>();
+  const [deleteBookIsbn, setDeleteBookIsbn] = useState<null | string>();
 
   //console.log('received book', book)
 
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useDispatch<AppDispatch>();
 
   //console.log('before handle edit', books.items)
 
   const bookToBeUpdated = books.items.find((book) => {
-    if (book.isbn === updateBookIsbn) return book
-  })
+    if (book.isbn === updateBookIsbn) return book;
+  });
 
   useEffect(() => {
-    dispatch(fetchBooksThunk())
-  }, [])
+    dispatch(fetchBooksThunk());
+  }, []);
 
   const handleEdit = (isbn: string) => {
     //alert(isbn)
-    setUpdateBookIsbn(isbn)
-  }
+    setUpdateBookIsbn(isbn);
+  };
 
-  const deleteAction = (isbn: string) => {
-    setDeleteBookIsbn(isbn)
-    dispatch(deleteBookThunk(isbn))
-  }
+  const handleDelete = (isbn: string) => {
+    if (window.confirm("Are you sure you want to delete this book?")) {
+      // Proceed with deleting the book
+      setDeleteBookIsbn(isbn);
+      dispatch(deleteBookThunk(isbn));
+    }
+  };
 
   return (
-    <React.Fragment>
-      <Grid
-        container
-        rowSpacing={1}
-        columnSpacing={{ xs: 1, sm: 0, md: 0 }}
-        className="main-container">
-        <Grid item xs={3}>
-          <AdminNav />
-        </Grid>
-        <Grid item xs={9} className="pl-24">
-          {books.isLoading ? <span>Loading .... </span> : ''}
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Authors</TableCell>
-                <TableCell>Publisher</TableCell>
-                <TableCell>Publish Date</TableCell>
-                <TableCell>Status</TableCell>
+    <Row>
+      <Col lg="12">
+        <Card>
+          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
+            <i className="bi bi-card-text me-2"> </i>
+            Books
+          </CardTitle>
+          <CardBody className="">
+            <Table bordered hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Title</th>
+                  <th>Author(s)</th>
+                  <th>Publisher</th>
+                  <th>Publish Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {books.items.map((book, index) => (
+                  <tr key={book.isbn}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{book.title}</td>
+                    <td>
+                      {book.authorList.map((author) => (
+                        <div key={author.id}>{author.name}</div>
+                      ))}
+                    </td>
+                    <td>{book.publishers}</td>
+                    <td>{book.publishedDate}</td>
+                    <td>{book.status}</td>
+                    <td className="button-group">
+                      <Button
+                        className="btn"
+                        color="primary"
+                        size="sm"
+                        onClick={() => handleEdit(book.isbn)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        className="btn"
+                        color="primary"
+                        size="sm"
+                        onClick={() => handleDelete(book.isbn)}
+                      >
+                        Delete
+                      </Button>
+                      {books.error && deleteBookIsbn == book.isbn ? (
+                        <span className="error">{books.error.message}</span>
+                      ) : (
+                        ""
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            {/* bookToBeUpdated && <EditBookForm {...bookToBeUpdated} /> */}
+          </CardBody>
+        </Card>
+      </Col>
+    </Row>
+  );
+};
 
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {books.items.map((book) => (
-                <TableRow key={book.isbn}>
-                  <TableCell>{book.title}</TableCell>
-                  <TableCell>
-                    {book.authorList.map((author) => (
-                      <>
-                        <span key={author.id}>{author.name} </span>
-                        <br />
-                      </>
-                    ))}
-                  </TableCell>
-                  <TableCell>{book.publishers}</TableCell>
-                  <TableCell>{book.publishedDate}</TableCell>
-                  <TableCell>{book.status}</TableCell>
-
-                  <TableCell>
-                    <Button size="small" onClick={() => handleEdit(book.isbn)}>
-                      Edit
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() => {
-                        deleteAction(book.isbn)
-                      }}>
-                      Delete
-                    </Button>
-                    {books.error && deleteBookIsbn == book.isbn ? (
-                      <span className="error">{books.error}</span>
-                    ) : (
-                      ''
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {bookToBeUpdated && <EditBookForm {...bookToBeUpdated} />}
-        </Grid>
-      </Grid>
-    </React.Fragment>
-  )
-}
-
-export default BooksTable
+export default BooksTable;
