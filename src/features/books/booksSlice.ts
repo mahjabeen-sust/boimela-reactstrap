@@ -130,7 +130,7 @@ export const editBookThunk = createAsyncThunk(
 //delete book thunk
 export const deleteBookThunk = createAsyncThunk(
   "books/delete",
-  async (isbn: string) => {
+  async (isbn: string, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
 
     const headers = {
@@ -139,28 +139,37 @@ export const deleteBookThunk = createAsyncThunk(
     };
 
     // Make the Axios request
-    const response = await axios
-      .delete(`${API_PLACEHOLDER}/api/v1/books/${isbn}`, {
-        headers,
-      })
-      .catch(function (error) {
-        if (error.response) {
-          return {
-            status: error.response.status,
-            data: error.response.data,
-          };
-        } else if (error.request) {
-          console.log("error.request > ", error.request);
-        } else {
-          console.log("Error", error.message);
+    try {
+      const response = await axios.delete(
+        `${API_PLACEHOLDER}/api/v1/books/${isbn}`,
+        {
+          headers,
         }
-        console.log("error.config", error.config);
-      });
-    //console.log('response', response)
-    return {
-      status: response?.status,
-      data: response?.data,
-    };
+      );
+      //console.log('response', response)
+      return {
+        status: response?.status,
+        data: response?.data,
+      };
+    } catch (error: any) {
+      if (error.response) {
+        // Handle 409 Conflict or other errors here
+        return rejectWithValue({
+          status: error.response.status,
+          message: error.response.data || "Conflict occurred",
+        });
+      } else if (error.request) {
+        return rejectWithValue({
+          status: "No response",
+          message: "No response from the server",
+        });
+      } else {
+        return rejectWithValue({
+          status: "Request error",
+          message: error.message,
+        });
+      }
+    }
   }
 );
 
