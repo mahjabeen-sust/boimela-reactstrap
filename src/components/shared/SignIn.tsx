@@ -14,6 +14,7 @@ import {
   FormGroup,
   Label,
   Input,
+  Alert
 } from "reactstrap";
 
 import { signInThunk } from "../../features/login/authSlice";
@@ -57,9 +58,6 @@ const SignIn = () => {
   return (
     <Row>
       <Col>
-        {/* --------------------------------------------------------------------------------*/}
-        {/* Card-1*/}
-        {/* --------------------------------------------------------------------------------*/}
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-bell me-2"> </i>
@@ -90,14 +88,17 @@ const SignIn = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </FormGroup>
-
-              <Button className="btn" outline color="primary" type="submit">
-                Sign In
-              </Button>
-              {authError ? <div className="error">{authError}</div> : ""}
-              <Button className="btn" outline color="primary" type="button">
-                <Link to="/signup">{"Don't have an account? Sign Up"}</Link>
-              </Button>
+              <div className="button-group">
+                <Button className="btn" color="primary" type="submit">
+                  Sign In
+                </Button>
+                {authError ? <Alert color="danger">{authError.message}</Alert> : ""}
+                <Link to="/signup">
+                  <Button className="btn" color="primary" type="button">
+                    {"Don't have an account? Sign Up"}
+                  </Button>
+                </Link>
+              </div>
             </Form>
           </CardBody>
         </Card>

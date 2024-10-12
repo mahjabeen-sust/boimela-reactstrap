@@ -16,7 +16,9 @@ function LoginControl() {
       {user.username !== null ? (
         <Link to="/logout">
           <Button
+            className="btn"
             color="primary"
+            size="sm"
             onClick={() => {
               dispatch(logout());
             }}
@@ -26,7 +28,7 @@ function LoginControl() {
         </Link>
       ) : (
         <Link to="/login">
-          <Button color="primary">Login</Button>
+          <Button className="btn" color="primary" size="sm">Login</Button>
         </Link>
       )}
     </div>
