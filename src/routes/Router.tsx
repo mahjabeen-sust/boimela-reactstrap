@@ -12,7 +12,7 @@ const MinimalLayout = lazy(() => import("../layouts/MinimalLayout.tsx"));
 const Books = lazy(() => import("../components/book/Books.tsx"));
 const Borrowed = lazy(() => import("..//components/user/Borrowed.tsx"));
 const Dashboard = lazy(() => import("../components/user/Dashboard.tsx"));
-const BookForm = lazy(() => import("../components/book/AddBookForms.tsx"));
+const AddBook = lazy(() => import("../components/book/AddBook.tsx"));
 const AuthorForm = lazy(() => import("../components/author/AuthorForm.tsx"));
 const EditAuthor = lazy(() => import("../components/author/EditAuthor.tsx"));
 const CategoryForm = lazy(
@@ -63,7 +63,7 @@ export const ThemeRoutes = [
         element: <FullLayout />, // FullLayout as parent for admin routes
         children: [
           { path: "adminDashboard", element: <Books /> },
-          { path: "addBook", element: <BookForm /> },
+          { path: "addBook", element: <AddBook /> },
           { path: "updateBook", element: <BooksTable /> },
           { path: "addAuthor", element: <AuthorForm /> },
           { path: "updateAuthor", element: <EditAuthor /> },

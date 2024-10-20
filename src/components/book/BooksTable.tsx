@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Row, Col, Table, Card, CardTitle, CardBody, Button } from "reactstrap";
@@ -7,7 +7,7 @@ import {
   fetchBooksThunk,
   deleteBookThunk,
 } from "../../features/books/booksSlice";
-import EditBookForm from "./EditBookForm";
+import EditBook from "./EditBook";
 
 const BooksTable = () => {
   const books = useSelector((state: RootState) => state.books);
@@ -102,7 +102,7 @@ const BooksTable = () => {
                 ))}
               </tbody>
             </Table>
-            {/* bookToBeUpdated && <EditBookForm {...bookToBeUpdated} /> */}
+            {bookToBeUpdated && <EditBook {...bookToBeUpdated} />}
           </CardBody>
         </Card>
       </Col>

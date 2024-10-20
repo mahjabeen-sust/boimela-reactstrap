@@ -71,6 +71,7 @@ export const addNewBookThunk = createAsyncThunk(
     } catch (error: any) {
       if (error.response) {
         // Handle 409 Conflict or other errors here
+        console.log("book add rejection payload > ", error.response);
         return rejectWithValue({
           status: error.response.status,
           message: error.response.data || "Conflict occurred",
@@ -93,37 +94,45 @@ export const addNewBookThunk = createAsyncThunk(
 //edit book thunk
 export const editBookThunk = createAsyncThunk(
   "books/edit",
-  async (book: BookDTO) => {
+  async (book: BookDTO, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
 
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
     };
-
-    // Make the Axios request
-    const response = await axios
-      .put(`${API_PLACEHOLDER}/api/v1/books/${book.isbn}`, book, {
-        headers,
-      })
-      .catch(function (error) {
-        if (error.response) {
-          return {
-            status: error.response.status,
-            data: error.response.data,
-          };
-        } else if (error.request) {
-          console.log("error.request > ", error.request);
-        } else {
-          console.log("Error", error.message);
+    try {
+      const response = await axios.put(
+        `${API_PLACEHOLDER}/api/v1/books/${book.isbn}`,
+        book,
+        {
+          headers,
         }
-        console.log("error.config", error.config);
-      });
-    //console.log('response', response)
-    return {
-      status: response?.status,
-      data: response?.data,
-    };
+      );
+      return {
+        status: response.status,
+        data: response.data,
+      };
+    } catch (error: any) {
+      if (error.response) {
+        // Handle 409 Conflict or other errors here
+        console.log("book edit rejection payload > ", error.response);
+        return rejectWithValue({
+          status: error.response.status,
+          message: error.response.data || "Conflict occurred",
+        });
+      } else if (error.request) {
+        return rejectWithValue({
+          status: "No response",
+          message: "No response from the server",
+        });
+      } else {
+        return rejectWithValue({
+          status: "Request error",
+          message: error.message,
+        });
+      }
+    }
   }
 );
 
@@ -184,6 +193,9 @@ export const booksSlice = createSlice({
     setFilterCriteria: (state, action: PayloadAction<string>) => {
       state.filterCriteria = action.payload;
     },
+    resetStatus: (state) => {
+      state.status = null; // Reset status to null
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchBooksThunk.pending, (state, action) => {
@@ -205,8 +217,9 @@ export const booksSlice = createSlice({
     );
     //addBook
     //adding book reducers
-    builder.addCase(addNewBookThunk.pending, (state, action) => {
+    builder.addCase(addNewBookThunk.pending, (state) => {
       state.isLoading = true;
+      state.status = null;
     });
 
     builder.addCase(
@@ -218,6 +231,7 @@ export const booksSlice = createSlice({
         );
         state.isLoading = false;
         state.error = action.payload;
+        state.status = action.payload.status;
         //state.error = 'Something went wrong ...'
       }
     );
@@ -229,10 +243,7 @@ export const booksSlice = createSlice({
         state.items = [action.payload.data, ...state.items];
         state.status = action.payload.status;
 
-        console.log(
-          "inside addnewauthorThunk fulfilled>payload: ",
-          action.payload
-        );
+        //console.log("inside addnewauthorThunk fulfilled>payload: ",action.payload);
       }
     );
 
@@ -246,25 +257,23 @@ export const booksSlice = createSlice({
       (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         state.error = action.payload.data;
+        state.status = action.payload.status;
       }
     );
     builder.addCase(
       editBookThunk.fulfilled,
       (state, action: PayloadAction<any>) => {
         state.isLoading = false;
-        if (action.payload?.status == 200) {
-          state.error = null;
-          state.items = state.items.map((item) => {
-            if (item.isbn === action.payload.data.isbn) {
-              return action.payload.data;
-            }
 
-            return item;
-          });
-        } else {
-          state.error = action.payload?.data;
-        }
-        state.status = action.payload?.status;
+        state.error = null;
+        state.items = state.items.map((item) => {
+          if (item.isbn === action.payload.data.isbn) {
+            return action.payload.data;
+          }
+
+          return item;
+        });
+        state.status = action.payload.status;
       }
     );
 
